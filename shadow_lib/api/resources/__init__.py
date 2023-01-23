@@ -12,6 +12,7 @@ from .author import AuthorDetailResource, AuthorListResource
 from .book import BookDetailResource, BookListResource
 from .customer import CustomerDetailResource, CustomerListResource
 from .order import OrderDetailResource, OrderListResource
+from .borrowed_book import BorrowedBookDetailResource, BorrowedBookListResource
 
 
 __all__ = [
@@ -34,4 +35,6 @@ __all__ = [
     "CustomerListResource",
     "OrderDetailResource",
     "OrderListResource",
+    "BorrowedBookDetailResource",
+    "BorrowedBookListResource",
 ]

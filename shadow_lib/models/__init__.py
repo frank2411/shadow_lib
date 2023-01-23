@@ -16,6 +16,7 @@ from .model_errors import (
     BOOK_NOT_FOUND_ERR_MESSAGE,
     CUSTOMER_NOT_FOUND_ERR_MESSAGE,
     ORDER_NOT_FOUND_ERR_MESSAGE,
+    BORROWED_BOOK_NOT_FOUND_ERR_MESSAGE,
 )
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "BOOK_NOT_FOUND_ERR_MESSAGE",
     "CUSTOMER_NOT_FOUND_ERR_MESSAGE",
     "ORDER_NOT_FOUND_ERR_MESSAGE",
+    "BORROWED_BOOK_NOT_FOUND_ERR_MESSAGE",
     "db",
     "User",
     "Token",

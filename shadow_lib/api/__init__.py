@@ -21,6 +21,8 @@ from .resources import (
     CustomerListResource,
     OrderDetailResource,
     OrderListResource,
+    BorrowedBookDetailResource,
+    BorrowedBookListResource,
 )
 
 api_blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -62,6 +64,14 @@ api.add_resource(
     methods=["GET", "PATCH", "DELETE"],
 )
 api.add_resource(OrderListResource, "/orders", methods=["GET", "POST"])
+
+# BorrowedBook apis
+api.add_resource(
+    BorrowedBookDetailResource,
+    "/borrowed-books/<uuid:borrowed_book_id>",
+    methods=["GET", "PATCH", "DELETE"],
+)
+api.add_resource(BorrowedBookListResource, "/borrowed-books", methods=["GET", "POST"])
 
 # User apis
 api.add_resource(

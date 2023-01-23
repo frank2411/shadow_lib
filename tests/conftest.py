@@ -202,6 +202,20 @@ def simple_customer(db: DBConfig, regular_user: User) -> Book:
     return customer
 
 
+@pytest.fixture
+def simple_customer_2(db: DBConfig, regular_user: User) -> Book:
+
+    customer = Customer(
+        fullname="customer test 2",
+        document_type="generic_id",
+        document_id="1231231231223",
+        created_by_id=regular_user.id,
+    )
+
+    customer.save()
+    return customer
+
+
 # temporary fixture to set current_user
 @pytest.fixture
 def set_current_user() -> Callable[[User], User]:

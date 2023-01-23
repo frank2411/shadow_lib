@@ -16,28 +16,11 @@ class BorrowedBookSchema(SQLAlchemyAutoSchema):
         "qty_exceeded": "Quantity for this book {book_id} is too much",
     }
 
-    order = FixedRelated(dump_only=True)
-    book = FixedRelated(required=True, data_key="id")
-
-    def reset_qty(self, instance: BorrowedBook):
-        parent = self.context["parent"]
-
-        # Get original quantity from parent
-        for borrowed_book in parent.borrowed_books:  # pragma: no cover
-            if borrowed_book.book_id == instance["book"].id:
-                break
-
-        # I in every case, reset the quantity without persisting it in the db
-        borrowed_book.book.qty += borrowed_book.qty
+    order = FixedRelated(dump_only=True, data_key="order_id")
+    book = FixedRelated(required=True, data_key="book_id")
 
     @post_load
     def check_and_update_qty(self, instance: BorrowedBook, **kwargs: Any):
-        if not instance.get("qty"):
-            return instance
-
-        if kwargs.get("partial") and instance.get("qty"):
-            self.reset_qty(instance)
-
         if instance["book"].qty < instance["qty"]:
             raise ValidationError(
                 self.error_messages["qty_exceeded"].format(book_id=instance["book"].id),

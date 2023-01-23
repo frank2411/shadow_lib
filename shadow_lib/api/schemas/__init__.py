@@ -10,6 +10,10 @@ from .author import AuthorSchema
 from .book import BookSchema
 from .customer import CustomerSchema
 from .order import OrderSchema
+from .borrowed_book import (
+    BorrowedBookSingleUpdateSchema,
+    BorrowedBookSingleCreationSchema,
+)
 
 
 __all__ = [
@@ -22,4 +26,6 @@ __all__ = [
     "BookSchema",
     "CustomerSchema",
     "OrderSchema",
+    "BorrowedBookSingleUpdateSchema",
+    "BorrowedBookSingleCreationSchema",
 ]

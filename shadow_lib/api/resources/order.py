@@ -26,7 +26,7 @@ class OrderDetailResource(Resource):
 
     def patch(self, order_id: uuid.UUID) -> SuccessResponseType | ErrorResponseType:
         order = Order.get_order(order_id, g.current_user)
-        schema = OrderSchema(partial=True, instance=order)
+        schema = OrderSchema(partial=True, instance=order, exclude=["borrowed_books"])
 
         try:
             order = schema.load(request.json)

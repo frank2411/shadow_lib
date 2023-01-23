@@ -44,177 +44,41 @@ class TestOrderDetailGetAndUpdateAndDelete:
         self,
         db: DBConfig,
         client: FlaskClient,
-        regular_user: User,
-        simple_book: Book,
         simple_order: Order,
+        simple_book: Book,
+        simple_customer_2: Customer,
         regular_user_headers: Mapping[str, str],
     ) -> None:
 
-        original_qty = simple_book.qty - simple_order.borrowed_books[0].qty
-        original_borrowed_qty = simple_order.borrowed_books[0].qty
-
-        assert original_qty == 16
-
-        simple_book.qty = original_qty
-        simple_book.save()
-
         data = dict(
-            borrowed_books=[
-                dict(
-                    id=str(simple_book.id),
-                    qty=12
-                )
-            ]
+            customer=str(simple_customer_2.id)
         )
+
+        assert simple_order.customer_id != simple_customer_2.id
 
         res = client.patch(f"/api/v1/orders/{simple_order.id}", json=data, headers=regular_user_headers)
 
         assert res.status_code == 200
         assert res.json
         assert res.json["order"]["id"] == str(simple_order.id)
-        assert res.json["order"]["borrowed_books"][0]["id"] == str(simple_book.id)
-        assert res.json["order"]["borrowed_books"][0]["qty"] == 12
+        assert res.json["order"]["customer"] == str(simple_customer_2.id)
+        assert "borrowed_books" not in res.json["order"]
 
-        updated_qty_check = Book.get(simple_book.id).qty
-
-        assert original_qty != updated_qty_check
-        assert updated_qty_check == ((original_qty + original_borrowed_qty) - 12)
-
-    def test_update_order_multiple_books(
+    def test_update_order_error_trying_to_modify_borrowed_books(
         self,
         db: DBConfig,
         client: FlaskClient,
-        regular_user: User,
-        simple_book: Book,
-        simple_book_2: Book,
-        simple_order_2_books: Order,
-        regular_user_headers: Mapping[str, str],
-    ) -> None:
-
-        original_qty_1 = simple_book.qty - simple_order_2_books.borrowed_books[0].qty
-        original_borrowed_qty_1 = simple_order_2_books.borrowed_books[0].qty
-
-        original_qty_2 = simple_book.qty - simple_order_2_books.borrowed_books[1].qty
-        original_borrowed_qty_2 = simple_order_2_books.borrowed_books[1].qty
-
-        assert original_qty_1 == 16
-        assert original_qty_2 == 10
-
-        simple_book.qty = original_qty_1
-        simple_book.save()
-
-        simple_book_2.qty = original_qty_2
-        simple_book_2.save()
-
-        data = dict(
-            borrowed_books=[
-                dict(
-                    id=str(simple_book.id),
-                    qty=12
-                ),
-                dict(
-                    id=str(simple_book_2.id),
-                    qty=12
-                )
-            ]
-        )
-
-        res = client.patch(f"/api/v1/orders/{simple_order_2_books.id}", json=data, headers=regular_user_headers)
-
-        assert res.status_code == 200
-        assert res.json
-        assert res.json["order"]["id"] == str(simple_order_2_books.id)
-        assert res.json["order"]["borrowed_books"][0]["id"] == str(simple_book.id)
-        assert res.json["order"]["borrowed_books"][0]["qty"] == 12
-        assert res.json["order"]["borrowed_books"][1]["id"] == str(simple_book_2.id)
-        assert res.json["order"]["borrowed_books"][1]["qty"] == 12
-
-        updated_qty_check_1 = Book.get(simple_book.id).qty
-        updated_qty_check_2 = Book.get(simple_book_2.id).qty
-
-        assert original_qty_1 != updated_qty_check_1
-        assert updated_qty_check_1 == ((original_qty_1 + original_borrowed_qty_1) - 12)
-
-        assert original_qty_2 != updated_qty_check_2
-        assert updated_qty_check_2 == ((original_qty_2 + original_borrowed_qty_2) - 12)
-
-    def test_update_order_no_change_in_quantity(
-        self,
-        db: DBConfig,
-        client: FlaskClient,
-        regular_user: User,
-        simple_book: Book,
         simple_order: Order,
-        regular_user_headers: Mapping[str, str],
-    ) -> None:
-
-        original_qty = simple_book.qty - simple_order.borrowed_books[0].qty
-
-        assert original_qty == 16
-
-        simple_book.qty = original_qty
-        simple_book.save()
-
-        data = dict(
-            borrowed_books=[
-                dict(
-                    id=str(simple_book.id),
-                )
-            ]
-        )
-
-        res = client.patch(f"/api/v1/orders/{simple_order.id}", json=data, headers=regular_user_headers)
-
-        assert res.status_code == 200
-        assert res.json
-        assert res.json["order"]["id"] == str(simple_order.id)
-        assert res.json["order"]["borrowed_books"][0]["id"] == str(simple_book.id)
-        assert res.json["order"]["borrowed_books"][0]["qty"] == simple_order.borrowed_books[0].qty
-
-        updated_qty_check = Book.get(simple_book.id).qty
-
-        assert original_qty == updated_qty_check
-
-    def test_update_order_two_books_order_delete_one_order(
-        self,
-        db: DBConfig,
-        client: FlaskClient,
-        regular_user: User,
         simple_book: Book,
-        simple_order_2_books: Order,
+        simple_customer_2: Customer,
         regular_user_headers: Mapping[str, str],
     ) -> None:
 
         data = dict(
             borrowed_books=[
                 dict(
-                    id=str(simple_book.id),
-                    qty=5
-                )
-            ]
-        )
-
-        res = client.patch(f"/api/v1/orders/{simple_order_2_books.id}", json=data, headers=regular_user_headers)
-
-        assert res.status_code == 200
-        assert res.json
-        assert len(res.json["order"]["borrowed_books"]) == 1
-
-    def test_update_order_add_inexistent_book(
-        self,
-        db: DBConfig,
-        client: FlaskClient,
-        regular_user: User,
-        simple_book: Book,
-        simple_order: Order,
-        random_uuid: uuid.UUID,
-        regular_user_headers: Mapping[str, str],
-    ) -> None:
-
-        data = dict(
-            borrowed_books=[
-                dict(
-                    id=str(random_uuid),
+                    book_id=str(simple_book.id),
+                    qty=12
                 )
             ]
         )
@@ -223,7 +87,7 @@ class TestOrderDetailGetAndUpdateAndDelete:
 
         assert res.status_code == 422
         assert res.json
-        assert res.json["borrowed_books"]["0"]["id"][0] == "Related Object doesn't exist in DB"
+        assert res.json["borrowed_books"][0] == "Unknown field."
 
     def test_delete_order_success(
         self,
@@ -270,7 +134,7 @@ class TestOrderListAndCreation:
             due_date="2022-10-10",
             borrowed_books=[
                 dict(
-                    id=str(simple_book.id),
+                    book_id=str(simple_book.id),
                     qty=4
                 )
             ]
@@ -281,7 +145,7 @@ class TestOrderListAndCreation:
         assert res.status_code == 201
         assert res.json["message"] == "order created"
         assert res.json["order"]["created_by"] == str(regular_user.id)
-        assert res.json["order"]["borrowed_books"][0]["id"] == str(simple_book.id)
+        assert res.json["order"]["borrowed_books"][0]["book_id"] == str(simple_book.id)
 
         updated_qty_check = Book.get(simple_book.id).qty
 
@@ -307,11 +171,11 @@ class TestOrderListAndCreation:
             due_date="2022-10-10",
             borrowed_books=[
                 dict(
-                    id=str(simple_book.id),
+                    book_id=str(simple_book.id),
                     qty=4
                 ),
                 dict(
-                    id=str(simple_book_2.id),
+                    book_id=str(simple_book_2.id),
                     qty=4
                 ),
             ]
@@ -322,7 +186,7 @@ class TestOrderListAndCreation:
         assert res.status_code == 201
         assert res.json["message"] == "order created"
         assert res.json["order"]["created_by"] == str(regular_user.id)
-        assert res.json["order"]["borrowed_books"][0]["id"] == str(simple_book.id)
+        assert res.json["order"]["borrowed_books"][0]["book_id"] == str(simple_book.id)
 
         updated_qty_check_1 = Book.get(simple_book.id).qty
         updated_qty_check_2 = Book.get(simple_book.id).qty
@@ -348,7 +212,7 @@ class TestOrderListAndCreation:
             due_date="2022-10-10",
             borrowed_books=[
                 dict(
-                    id=str(simple_book.id),
+                    book_id=str(simple_book.id),
                     qty=100
                 )
             ]

@@ -11,28 +11,51 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import select
 
 from .db import db
-from .model_errors import ORDER_NOT_FOUND_ERR_MESSAGE
+from .model_errors import (
+    ORDER_NOT_FOUND_ERR_MESSAGE,
+    BORROWED_BOOK_NOT_FOUND_ERR_MESSAGE,
+)
 
 
 class BorrowedBook(db.Model):  # type: ignore
     __tablename__ = "borrowed_books"
 
+    id = Column(
+        UUID(as_uuid=True), default=uuid.uuid4, nullable=False, primary_key=True
+    )
+
     order_id = Column(
         UUID(as_uuid=True),
         ForeignKey("orders.id"),
         nullable=False,
-        primary_key=True,
     )
+
     book_id = Column(
         UUID(as_uuid=True),
         ForeignKey("books.id"),
         nullable=False,
-        primary_key=True,
     )
+
     order = relationship("Order", back_populates="borrowed_books")
     book = relationship("Book", back_populates="borrowed_books")
 
     qty = Column(Integer, nullable=False, default=0)
+
+    @staticmethod
+    def get_borrowed_book(borrowed_book_id: uuid.UUID, current_user: Any) -> "Order":
+        br_book_query = select(BorrowedBook).where(BorrowedBook.id == borrowed_book_id)
+        br_book = db.session.execute(br_book_query).unique().scalar_one_or_none()
+
+        if not br_book:
+            return abort(404, BORROWED_BOOK_NOT_FOUND_ERR_MESSAGE)
+
+        return br_book
+
+    @staticmethod
+    def get_borrowed_books(current_user: Any) -> list["Order"]:
+        br_book_query = select(BorrowedBook)
+        br_books = db.session.execute(br_book_query).unique().scalars().all()
+        return br_books
 
 
 class Order(db.Model):  # type: ignore
