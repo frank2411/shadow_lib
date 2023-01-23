@@ -1,0 +1,698 @@
+openapi: 3.0.0
+info:
+  title: shadow_lib API
+  description: Techincal test for shadow APIs
+  version: '0.1'
+servers:
+  - url: http://web-staging.v2.dev.digeiz.com:9191/api/v1
+    description: Staging server for testing
+  - url: https://live.digeiz.fr/api/v1
+    description: Local server for testing
+paths:
+  /login:
+    post:
+      tags:
+        - auth
+      summary: Authenticate user.
+      description: Returns access and refresh token if successful.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  access_token_expiration:
+                    type: string
+                    format: date-time
+                  refresh_token_expiration:
+                    type: string
+                    format: date-time
+        '400':
+          description: Error. Bad credentials.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /refresh-token:
+    post:
+      tags:
+        - tokens
+      summary: Refresh user token.
+      description: Returns new access token if successful.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+      responses:
+        '200':
+          description: Refresh successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  access_token_expiration:
+                    type: string
+                    format: date-time
+        '400':
+          description: Error. Bad request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: error detail
+        '403':
+          description: Error. Tempering with credentials or token expired.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: error detail
+        '404':
+          description: Error. Token does not exist. User is not active. User doesn't exist anymore.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: error detail
+
+  /revoke-access-token:
+    post:
+      tags:
+        - tokens
+      summary: Revoke user token.
+      description: Revokes access token if successful.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_token:
+                  type: string
+              required:
+                - access_token
+      responses:
+        '200':
+          description: Refresh successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Error. Token does not exist. User is not active. User doesn't exist anymore.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: error detail
+  /revoke-refresh-token:
+    post:
+      tags:
+        - tokens
+      summary: Revoke user refresh token.
+      description: Revokes refresh token if successful.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+      responses:
+        '200':
+          description: Refresh successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Error. Token does not exist. User is not active. User doesn't exist anymore.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: error detail
+  /users:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Returns a list of users.
+      description: Returns a list of users optionally filtered by customer.
+      parameters:
+        - in: query
+          name: customer_id
+          schema:
+            type: integer
+          description: Customer id on which to filer for superadmin
+      responses:
+        '200':    # status code
+          description: A JSON array of user objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      description: List of user JSON objects
+                      type: object
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Creates a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                role:
+                  type: string
+                password:
+                  type: string
+                halls:
+                  type: array
+                  items:
+                    description: List of hall uuid
+                    type: string
+              required:
+                - email
+                - role
+                - password
+                - halls
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: user created
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      halls:
+                        type: array
+                        items:
+                          description: List of hall uuid
+                          type: string
+
+        '422':
+          description: List of errors occured in creation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorfield:
+                    type: array
+                    items:
+                      type: string
+                      description: Error detail
+  /users/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Returns a user by ID. If it exists.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id to get.
+          schema:
+            type : integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      halls:
+                        type: array
+                        items:
+                          description: List of hall uuid
+                          type: string
+        '404':
+          description: User not foud.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: User not found
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Update a users.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id to update.
+          schema:
+            type : integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                email:
+                  type: string
+                role:
+                  type: string
+                halls:
+                  type: array
+                  items:
+                    description: List of hall uuid
+                    type: string
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    description: updated user object
+                    type: object
+        '422':
+          description: List of errors occured in creation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorfield:
+                    type: array
+                    items:
+                      type: string
+                      description: Error detail
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Delete a user ( Superadmin restricted ).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id to get.
+          schema:
+            type : integer
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: User not foud.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: User not found
+  /users/change-password:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Updates a user password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_password:
+                  type: string
+                new_password:
+                  type: string
+                new_password_confirm:
+                  type: string
+              required:
+                - old_password
+                - new_password
+                - new_password_confirm
+      responses:
+        '201':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: password updated
+        '422':
+          description: List of errors occured in update.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorfield:
+                    type: array
+                    items:
+                      type: string
+                      description: Error detail
+  /users/me:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Get me.
+      responses:
+        '200':
+          description: Get me as JSON object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                  role:
+                    type: string
+                  halls:
+                    type: array
+                    items:
+                      description: List of hall uuid
+                      type: string
+  /customers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - customers
+      summary: Returns a list of customers. Only for superadmins.
+      description: Returns a list of customers.
+      responses:
+        '200':    # status code
+          description: A JSON array of customer objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customers:
+                    type: array
+                    items:
+                      description: List of custome JSON objects
+                      type: object
+    post:
+      tags:
+        - customers
+      security:
+        - bearerAuth: []
+      summary: Creates a customer. Only for superadmins.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+              required:
+                - name
+                - description
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: site created
+                  customer:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+        '422':
+          description: List of errors occured in creation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorfield:
+                    type: array
+                    items:
+                      type: string
+                      description: Error detail
+  /customers/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - customers
+      summary: Returns a customer by ID. If it exists.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Customer id to get.
+          schema:
+            type : integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customer:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      description:
+                        type: string
+        '404':
+          description: Customer not foud.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: User not found
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - customers
+      summary: Update a customers.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Customer id to update.
+          schema:
+            type : integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  customer:
+                    description: updated customer object
+                    type: object
+        '422':
+          description: List of errors occured in creation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorfield:
+                    type: array
+                    items:
+                      type: string
+                      description: Error detail
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - customers
+      summary: Delete a customer ( Superadmin restricted ).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User id to get.
+          schema:
+            type : integer
+      responses:
+        '200':
+          description: Customer deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Customer not foud.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Customer not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Hash

@@ -1,0 +1,55 @@
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID # Commit in open merge request
+    - if: $CI_COMMIT_TAG # tag
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH # Commit in master (or merge request close to master)
+    - if: $CI_PIPELINE_SOURCE == "web"
+
+default:
+  tags:
+    - ops
+
+image: python:3.10
+
+include:
+  - project: "global/ci-templates"
+    file: "/templates/docker.template.yml"
+  - project: "global/ci-templates"
+    file: "/templates/pages.template.yml"
+
+stages:
+  - test
+  - release
+  - deploy
+
+services:
+  - postgres:14-alpine
+
+variables:
+  POSTGRES_DB: test_db
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: admin
+  PYTHON_ROOT_PATH: .
+  PYPI_REGISTRY_PROJECT_ID: 319
+  PYPI_URL: https://gitlab.edf-sf.com/api/v4/projects/${PYPI_REGISTRY_PROJECT_ID}/packages/pypi
+  PIP_EXTRA_INDEX_URL: https://gitlab.edf-sf.com/api/v4/projects/${PYPI_REGISTRY_PROJECT_ID}/packages/pypi/simple
+
+pre-commit:
+  stage: test
+  before_script:
+    - echo -e "machine gitlab.edf-sf.com\nlogin gitlab-ci-token\npassword
+      ${CI_JOB_TOKEN}" > $HOME/.netrc
+  script:
+    - pip3 install pre-commit
+    - pre-commit run -a
+
+test:
+  stage: test
+  before_script:
+    - echo -e "machine gitlab.edf-sf.com\nlogin gitlab-ci-token\npassword
+      ${CI_JOB_TOKEN}" > $HOME/.netrc
+  script:
+    - pip3 install .[dev]
+    - export TEST_DB_HOST=postgres
+    - tox
+  coverage: '/^TOTAL.+?(\d+\%)$/'

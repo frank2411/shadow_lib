@@ -1,0 +1,16 @@
+[run]
+omit = 
+    wsgi.py,
+    .tox/*,
+    tests/*,
+    setup.py,
+    *__init__.py,
+    gunicorn_configs/*,
+    shadow_lib/notify.py,
+    shadow_lib/app.py,
+    shadow_lib/config.py,
+    shadow_lib/models/db.py,
+    shadow_lib/api/swaggers_paths/*,
+    shadow_lib/commons/restful_plugin.py,
+    shadow_lib/extensions.py,
+    shadow_lib/api/schemas/custom_fields.py

@@ -1,0 +1,88 @@
+exclude: "^migrations/"
+repos:
+  - repo: https://github.com/myint/autoflake
+    rev: v1.4
+    hooks:
+      - id: autoflake
+        args:
+          - --in-place
+          - --expand-star-imports
+          - --remove-duplicate-keys
+          - --remove-unused-variables
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.32.0
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
+  - repo: https://github.com/asottile/blacken-docs
+    rev: v1.12.1
+    hooks:
+      - id: blacken-docs
+        additional_dependencies: [black==22.3.0]
+  - repo: https://github.com/ambv/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args:
+          - --safe
+          - --quiet
+          - --line-length=130
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-json
+      - id: check-ast
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        args:
+          - "--max-line-length=130"
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.942
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: python
+        "types": [python]
+        args: [
+            "--ignore-missing-imports",
+            "--disallow-untyped-defs",
+            "--disallow-untyped-calls",
+            # The option below triggers errors such as
+            # "Untyped decorator makes function "<function>" untyped"
+            # which are not relevant when decorators are imported from external libs.
+            # Uncomment if custom decorators are implemented.
+            # "--disallow-untyped-decorators",
+            "--scripts-are-modules",
+            "--implicit-reexport",
+            "--install-types",
+            "--non-interactive",
+            "--explicit-package-bases",
+            "--namespace-packages",
+          ]
+        require_serial: true
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.3.2
+    hooks:
+      - id: markdownlint-cli2
+        name: markdownlint-cli2
+        description: "Checks the style of Markdown/CommonMark files."
+        entry: markdownlint-cli2
+        language: node
+        types: [markdown]
+        minimum_pre_commit_version: 0.15.0
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.6.2
+    hooks:
+      - id: prettier
+        args: [--prose-wrap=always, --print-width=88]
