@@ -20,3 +20,4 @@ from shadow_lib.api.swaggers_paths import author_paths  # noqa
 from shadow_lib.api.swaggers_paths import customer_paths  # noqa
 from shadow_lib.api.swaggers_paths import book_paths  # noqa
 from shadow_lib.api.swaggers_paths import order_paths  # noqa
+from shadow_lib.api.swaggers_paths import borrowed_book_paths  # noqa

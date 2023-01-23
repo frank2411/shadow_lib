@@ -1,6 +1,7 @@
 from typing import Any
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
+from marshmallow.fields import UUID
 from marshmallow import post_load, pre_load, ValidationError, validates
 
 # from marshmallow import
@@ -42,6 +43,7 @@ class BorrowedBookSchema(SQLAlchemyAutoSchema):
 
 class OrderSchema(SQLAlchemyAutoSchema):
 
+    id = UUID(dump_only=True)
     borrowed_books = Nested(BorrowedBookSchema, many=True, required=True)
     customer = FixedRelated(required=True)
     created_by = FixedRelated(dump_only=True)

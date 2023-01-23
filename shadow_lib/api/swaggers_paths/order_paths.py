@@ -6,17 +6,41 @@ from shadow_lib.api.resources import OrderDetailResource, OrderListResource
 from shadow_lib.api.schemas import OrderSchema
 from shadow_lib.extensions import api_spec
 
+from .borrowed_book_paths import BorrowedBookFixedSchema
+
+
+class OrderSchemaFixed(OrderSchema):
+    borrowed_books = fields.Nested(BorrowedBookFixedSchema, many=True, required=True)
+    customer = fields.UUID(required=True)
+
+
+class OrderSchemaCreationFixed(OrderSchema):
+    borrowed_books = fields.Nested(
+        BorrowedBookFixedSchema(exclude=["order_id"]), many=True, required=True
+    )
+    customer = fields.UUID(required=True)
+
+
+class OrderSchemaPatchFixed(OrderSchema):
+    borrowed_books = fields.Nested(
+        BorrowedBookFixedSchema, dump_only=True, many=True, required=True
+    )
+    customer = fields.UUID(required=True)
+
 
 class OrderSchemaRich(Schema):
     message = fields.Str()
-    order = fields.Nested(OrderSchema)
+    order = fields.Nested(OrderSchemaFixed)
 
 
 class OrderSchemaMany(Schema):
-    orders = fields.Nested(OrderSchema(many=True))
+    orders = fields.Nested(OrderSchemaFixed(many=True))
 
 
 api_spec.components.schema("OrderSchema", schema=OrderSchema)
+api_spec.components.schema("OrderSchemaFixed", schema=OrderSchemaFixed)
+api_spec.components.schema("OrderSchemaCreationFixed", schema=OrderSchemaCreationFixed)
+api_spec.components.schema("OrderSchemaPatchFixed", schema=OrderSchemaPatchFixed)
 api_spec.components.schema(
     "OrderSchemaNoMessage", schema=OrderSchemaRich(exclude=["message"])
 )
@@ -47,7 +71,7 @@ api_spec.path(
                 "required": True,
                 "content": {
                     "application/json": {
-                        "schema": "OrderSchema",
+                        "schema": "OrderSchemaCreationFixed",
                     }
                 },
             },
@@ -106,7 +130,7 @@ api_spec.path(
                 "required": True,
                 "content": {
                     "application/json": {
-                        "schema": "OrderSchema",
+                        "schema": "OrderSchemaPatchFixed",
                     }
                 },
             },
