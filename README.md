@@ -50,6 +50,22 @@ Refresh token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2NzQ0ODMwMjgsIm5i
 In the `analysis` folder you should find the DB schema and a simple diagram flow
 
 
+# Run the tests locally
+To run the tests you have to (a database is required, you could use the one in the docker compose):
+
+```shell
+ # pip insatall dependencies
+ pip install -e ".[dev]"
+ 
+ # create test_db
+ postgres=# create database test_db;
+ 
+ # run tox
+ tox
+```
+
+
+
 
 
 
