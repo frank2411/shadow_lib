@@ -1,14 +1,7 @@
 import click
 from flask.cli import with_appcontext
 
-from shadow_lib.models import (
-    User,
-    Author,
-    Book,
-    Customer,
-    # Order,
-    # BorrowedBook
-)
+from shadow_lib.models import User, Author, Book, Customer, Order, BorrowedBook
 
 
 @click.command("populate-db")
@@ -50,3 +43,22 @@ def populate_db() -> User:  # pragma: no cover
     book.authors.append(author)
     book.save()
     click.echo(f"Created book with id {book.id} and author with id {author.id}\n")
+
+    order = Order(
+        customer_id=customer.id,
+        due_date="2022-10-10",
+    )
+
+    bb = BorrowedBook(
+        book_id=book.id,
+        qty=4,
+    )
+
+    order.borrowed_books.append(bb)
+    order.save()
+
+    click.echo(f"Created order with id {order.id} for book with id {book.id}\n")
+
+    # Update book quantity
+    book.qty -= 4
+    book.save()

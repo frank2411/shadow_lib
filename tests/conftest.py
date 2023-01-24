@@ -108,6 +108,18 @@ def simple_author(db: DBConfig, regular_user: User) -> Author:
 
 
 @pytest.fixture
+def simple_author_2(db: DBConfig, regular_user: User) -> Author:
+
+    author = Author(
+        first_name="Proviamo",
+        last_name="Ariproviamo",
+        created_by_id=regular_user.id
+    )
+    author.save()
+    return author
+
+
+@pytest.fixture
 def simple_book(db: DBConfig, regular_user: User, simple_author: Author) -> Book:
 
     book = Book(
@@ -133,11 +145,29 @@ def simple_book_2(db: DBConfig, regular_user: User, simple_author: Author) -> Bo
         EAN="test",
         SKU="TEST",
         created_by_id=regular_user.id,
-        release_date="2022-10-10",
+        release_date="2022-10-20",
         qty=20,
     )
 
     book.authors.append(simple_author)
+
+    book.save()
+    return book
+
+
+@pytest.fixture
+def simple_book_3(db: DBConfig, regular_user: User, simple_author_2: Author) -> Book:
+
+    book = Book(
+        title="Hyper random",
+        EAN="Hyper random",
+        SKU="Hyper random",
+        created_by_id=regular_user.id,
+        release_date="2022-10-30",
+        qty=20,
+    )
+
+    book.authors.append(simple_author_2)
 
     book.save()
     return book

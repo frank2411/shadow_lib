@@ -7,7 +7,7 @@ from .user import (
 )
 
 from .author import AuthorSchema
-from .book import BookSchema
+from .book import BookSchema, BookSearchSchema
 from .customer import CustomerSchema
 from .order import OrderSchema
 from .borrowed_book import (
@@ -24,6 +24,7 @@ __all__ = [
     "ResetPasswordSchema",
     "AuthorSchema",
     "BookSchema",
+    "BookSearchSchema",
     "CustomerSchema",
     "OrderSchema",
     "BorrowedBookSingleUpdateSchema",

@@ -12,7 +12,7 @@ docker compose up -d
 # Once the services started apply db migrations
 docker compose exec web alembic upgrade head
 
-# Populate the databse with a superadmin user, a customer, an author and a book. Have fun with an order creation!
+# Populate the databse with a superadmin user, a customer, an author, a book and an order for the created book. HAVE FUN NOW!
 docker compose exec web flask populate-db
 
 ```
@@ -28,6 +28,8 @@ docker compose exec web flask create-superadmin --email=<choose_email> --pasword
 ## Explore the API
 
 In order to play with the API a full documented swagger is available. You just need to go to: http://localhost:5000/api/v1/docs !
+
+A simple book search endpoint is also provided (and documented).
 
 
 # Bonus steps

@@ -1,7 +1,11 @@
 from flask import current_app
 from marshmallow import Schema, fields
 
-from shadow_lib.api.resources import BookDetailResource, BookListResource
+from shadow_lib.api.resources import (
+    BookDetailResource,
+    BookListResource,
+    BookSearchResource,
+)
 
 from shadow_lib.api.schemas import BookSchema
 from shadow_lib.extensions import api_spec
@@ -137,6 +141,44 @@ api_spec.path(
                 "404": {
                     "description": "book not found.",
                     "content": {"application/json": {"schema": "GeneralMessageSchema"}},
+                },
+            },
+        ),
+    ),
+)
+
+
+# OrganizationDetailResource
+api_spec.path(
+    resource=BookSearchResource,
+    # api=api,
+    app=current_app,
+    parameters=[
+        {
+            "name": "q",
+            "in": "query",
+            "required": True,
+            "description": (
+                "Generic query parameter. Searches in Book.title, Book.EAN, "
+                "Book.SKU, Author.first_name, Author.last_name"
+            ),
+            "schema": {"type": "string"},
+        }
+    ],
+    operations=dict(
+        get=dict(
+            security=[{"bearerAuth": []}],
+            summary="Returns a book by ID, if it exists",
+            description="Returns a book by ID, if it exists",
+            tags=["books_search"],
+            responses={
+                "200": {
+                    "description": "A JSON array of book objects",
+                    "content": {"application/json": {"schema": "BookSchemaMany"}},
+                },
+                "422": {
+                    "description": "List of errors occured in search.",
+                    "content": {"application/json": {"schema": "GeneralErrorSchema"}},
                 },
             },
         ),

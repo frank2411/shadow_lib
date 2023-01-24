@@ -17,6 +17,7 @@ from .resources import (
     AuthorListResource,
     BookDetailResource,
     BookListResource,
+    BookSearchResource,
     CustomerDetailResource,
     CustomerListResource,
     OrderDetailResource,
@@ -48,6 +49,7 @@ api.add_resource(
     BookDetailResource, "/books/<uuid:book_id>", methods=["GET", "PATCH", "DELETE"]
 )
 api.add_resource(BookListResource, "/books", methods=["GET", "POST"])
+api.add_resource(BookSearchResource, "/books/search", methods=["GET"])
 
 # Customer apis
 api.add_resource(

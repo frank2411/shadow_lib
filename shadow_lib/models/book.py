@@ -9,7 +9,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import select
 
+from shadow_lib.models import Author, BookAuthor
 from .model_errors import BOOK_NOT_FOUND_ERR_MESSAGE
+from sqlalchemy import or_
 
 from .db import db
 
@@ -61,3 +63,26 @@ class Book(db.Model):  # type: ignore
         book_query = select(Book)
         books = db.session.execute(book_query).unique().scalars().all()
         return books
+
+    @staticmethod
+    def search_books(current_user: Any, valid_filters: dict = None) -> list["Book"]:
+        book_query = select(Book).join(BookAuthor).join(Author)
+        book_query = book_query.where(
+            or_(
+                Book.title.ilike("%" + valid_filters["q"] + "%"),
+                Author.first_name.ilike("%" + valid_filters["q"] + "%"),
+                Author.last_name.ilike("%" + valid_filters["q"] + "%"),
+                Book.EAN.ilike("%" + valid_filters["q"] + "%"),
+                Book.SKU.ilike("%" + valid_filters["q"] + "%"),
+            )
+        )
+
+        # if valid_filters.get("release_date"):
+        #     book_query = book_query.where(
+        #         Book.release_date == valid_filters["release_date"]
+        #     )
+
+        books = db.session.execute(book_query).unique().scalars().all()
+        return books
+
+        # courses = courses.filter(models.Course.name.like('%' + searchForm.courseName.data + '%'))
