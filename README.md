@@ -4,6 +4,8 @@ Techincal test for shadow
 
 # How to run the project
 
+### FYI: for old docker compose versions pleas adjust following commands adding a "-" minus sign, in order to have 'docker-compose ...'
+
 ```shell
 
 # First start the docker compose services
