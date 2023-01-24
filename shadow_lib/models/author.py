@@ -35,8 +35,6 @@ class Author(db.Model):  # type: ignore
     last_name = Column(String(255), nullable=False)
     birth_date = Column(Date)
 
-    release_date = Column(Date, nullable=False)
-
     created_by_id = Column(
         UUID(as_uuid=True), ForeignKey("backoffice_users.id", ondelete="SET NULL")
     )

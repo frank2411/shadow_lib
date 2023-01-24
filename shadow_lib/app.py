@@ -8,7 +8,7 @@ from .api import api_blueprint
 from .models import db
 
 # Example for commands imports
-from .commands import create_superadmin, create_superadmin_token
+from .commands import create_superadmin, create_superadmin_token, populate_db
 
 
 load_dotenv()
@@ -33,4 +33,5 @@ def create_app(testing: bool = False) -> Flask:
     # Register general commands
     app.cli.add_command(create_superadmin)
     app.cli.add_command(create_superadmin_token)
+    app.cli.add_command(populate_db)
     return app

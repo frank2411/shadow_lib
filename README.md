@@ -12,10 +12,17 @@ docker compose up -d
 # Once the services started apply db migrations
 docker compose exec web alembic upgrade head
 
-# Create a superadmin user (it's not very useful for the sake of this test but, still)
+# Populate the databse with a superadmin user, a customer, an author and a book. Have fun with an order creation!
+docker compose exec web flask populate-db
+
+```
+### Default created user will have
+### email = test@test.com and password = admin
+
+```shell
+# OPTIONAL - Create a superadmin user (it's not very useful for the sake of this test but, still)
 docker compose exec web flask create-superadmin --email=<choose_email> --pasword=<choose_password>
 # Output should be something like -> Created superadmin user with email <chosen_email>
-
 ```
 
 ## Explore the API

@@ -114,7 +114,6 @@ class TestAuthorListAndCreation:
         data = dict(
             first_name="test",
             last_name="test",
-            release_date="2022-10-10",
         )
 
         res = client.post("/api/v1/authors", json=data, headers=regular_user_headers)
@@ -132,7 +131,6 @@ class TestAuthorListAndCreation:
 
         data = dict(
             last_name="test",
-            release_date="2022-10-10",
         )
 
         res = client.post("/api/v1/authors", json=data, headers=regular_user_headers)

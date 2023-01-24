@@ -101,7 +101,6 @@ def simple_author(db: DBConfig, regular_user: User) -> Author:
     author = Author(
         first_name="test",
         last_name="test",
-        release_date="2022-10-10",
         created_by_id=regular_user.id
     )
     author.save()
