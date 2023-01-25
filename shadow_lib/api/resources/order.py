@@ -38,6 +38,12 @@ class OrderDetailResource(Resource):
 
     def delete(self, order_id: uuid.UUID) -> SuccessResponseType:
         order = Order.get_order(order_id, g.current_user)
+
+        # Reset related books quantity
+        for br_book in order.borrowed_books:
+            br_book.book.qty += br_book.qty
+            br_book.save()
+
         order.delete()
         current_app.logger.info(f"order {order.id} deleted")
         return {"message": "order deleted"}

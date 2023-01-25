@@ -1,7 +1,7 @@
 from typing import Any
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow_sqlalchemy.fields import Nested
-from marshmallow.fields import UUID
+from marshmallow.fields import UUID, Bool
 from marshmallow import post_load, pre_load, ValidationError, validates
 
 # from marshmallow import
@@ -47,6 +47,7 @@ class OrderSchema(SQLAlchemyAutoSchema):
     borrowed_books = Nested(BorrowedBookSchema, many=True, required=True)
     customer = FixedRelated(required=True)
     created_by = FixedRelated(dump_only=True)
+    has_been_returned = Bool(load_default=False)
 
     @validates("borrowed_books")
     def validate_groups_empty_list(self, value: list) -> None:

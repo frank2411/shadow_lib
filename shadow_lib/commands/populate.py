@@ -47,6 +47,7 @@ def populate_db() -> User:  # pragma: no cover
     order = Order(
         customer_id=customer.id,
         due_date="2022-10-10",
+        has_been_returned=False,
     )
 
     bb = BorrowedBook(

@@ -93,16 +93,30 @@ class TestOrderDetailGetAndUpdateAndDelete:
         self,
         db: DBConfig,
         client: FlaskClient,
-        simple_order: Customer,
+        simple_order: Order,
+        simple_book: Book,
         regular_user_headers: Mapping[str, str],
     ) -> None:
+
+        original_qty = simple_book.qty - simple_order.borrowed_books[0].qty
+        original_borrowed_qty = simple_order.borrowed_books[0].qty
+
+        assert original_qty == 16
+
+        simple_book.qty = original_qty
+        simple_book.save()
 
         res = client.delete(f"/api/v1/orders/{simple_order.id}", headers=regular_user_headers)
 
         assert res.status_code == 200
         assert res.json["message"] == "order deleted"
 
-    def test_delete_customer_fail_customer_not_found(
+        updated_qty_check = Book.get(simple_book.id).qty
+
+        assert original_qty != updated_qty_check
+        assert updated_qty_check == (original_qty + original_borrowed_qty)
+
+    def test_delete_customer_fail_order_not_found(
         self,
         db: DBConfig,
         client: FlaskClient,

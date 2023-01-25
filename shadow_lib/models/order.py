@@ -4,7 +4,7 @@ from typing import Any
 
 from flask import abort
 
-from sqlalchemy import Column, Date, Integer, ForeignKey
+from sqlalchemy import Column, Date, Integer, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 
 from sqlalchemy.orm import relationship
@@ -71,6 +71,7 @@ class Order(db.Model):  # type: ignore
         nullable=False,
     )
 
+    has_been_returned = Column(Boolean, nullable=False, default=False)
     due_date = Column(Date, nullable=False)
 
     created_by_id = Column(
