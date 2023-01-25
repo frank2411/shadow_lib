@@ -127,7 +127,7 @@ class TestOrderDetailGetAndUpdateAndDelete:
         res = client.delete(f"/api/v1/orders/{random_uuid}", headers=regular_user_headers)
 
         assert res.status_code == 404
-        assert res.json["message"] == "Order not found"
+        assert res.json["message"] == "Order not found or alredy closed"
 
 
 class TestOrderListAndCreation:
@@ -262,7 +262,7 @@ class TestOrderListAndCreation:
         self,
         db: DBConfig,
         client: FlaskClient,
-        simple_order: Customer,
+        simple_order: Order,
         regular_user_headers: Mapping[str, str],
     ) -> None:
 
@@ -270,3 +270,47 @@ class TestOrderListAndCreation:
 
         assert res.status_code == 200
         assert len(res.json["orders"]) == 1
+
+
+class TestOrderClose:
+
+    def test_close_order_success(
+        self,
+        db: DBConfig,
+        client: FlaskClient,
+        simple_order: Order,
+        regular_user_headers: Mapping[str, str],
+    ) -> None:
+
+        assert simple_order.has_been_returned is False
+
+        res = client.patch(
+            f"/api/v1/orders/{simple_order.id}/close",
+            headers=regular_user_headers
+        )
+
+        assert Order.get(simple_order.id).has_been_returned is True
+
+        assert res.status_code == 200
+        assert res.json["message"] == "order closed"
+
+    def test_close_order_error_order_already_closed(
+        self,
+        db: DBConfig,
+        client: FlaskClient,
+        simple_order: Order,
+        regular_user_headers: Mapping[str, str],
+    ) -> None:
+
+        simple_order.has_been_returned = True
+        simple_order.save()
+
+        assert Order.get(simple_order.id).has_been_returned is True
+
+        res = client.patch(
+            f"/api/v1/orders/{simple_order.id}/close",
+            headers=regular_user_headers
+        )
+
+        assert res.status_code == 404
+        assert res.json["message"] == "Order not found or alredy closed"

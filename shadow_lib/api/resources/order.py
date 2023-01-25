@@ -26,7 +26,11 @@ class OrderDetailResource(Resource):
 
     def patch(self, order_id: uuid.UUID) -> SuccessResponseType | ErrorResponseType:
         order = Order.get_order(order_id, g.current_user)
-        schema = OrderSchema(partial=True, instance=order, exclude=["borrowed_books"])
+        schema = OrderSchema(
+            partial=True,
+            instance=order,
+            exclude=["borrowed_books", "has_been_returned"],
+        )
 
         try:
             order = schema.load(request.json)
@@ -78,3 +82,23 @@ class OrderListResource(Resource):
             "message": "order created",
             "order": schema.dump(order),
         }, 201
+
+
+class OrderCloseResource(Resource):
+
+    method_decorators = [
+        authenticate_user,
+        check_bearer_token,
+    ]
+
+    def patch(self, order_id: uuid.UUID) -> SuccessResponseType | ErrorResponseType:
+        order = Order.get_order(order_id, g.current_user)
+        order.has_been_returned = True
+        order.save()
+
+        for br_book in order.borrowed_books:
+            br_book.book.qty += br_book.qty
+            br_book.save()
+
+        schema = OrderSchema()
+        return {"message": "order closed", "order": schema.dump(order)}

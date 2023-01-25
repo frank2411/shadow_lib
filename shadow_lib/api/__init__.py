@@ -22,6 +22,7 @@ from .resources import (
     CustomerListResource,
     OrderDetailResource,
     OrderListResource,
+    OrderCloseResource,
     BorrowedBookDetailResource,
     BorrowedBookListResource,
 )
@@ -66,6 +67,7 @@ api.add_resource(
     methods=["GET", "PATCH", "DELETE"],
 )
 api.add_resource(OrderListResource, "/orders", methods=["GET", "POST"])
+api.add_resource(OrderCloseResource, "/orders/<uuid:order_id>/close", methods=["PATCH"])
 
 # BorrowedBook apis
 api.add_resource(

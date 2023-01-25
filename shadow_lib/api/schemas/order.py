@@ -42,7 +42,6 @@ class BorrowedBookSchema(SQLAlchemyAutoSchema):
 
 
 class OrderSchema(SQLAlchemyAutoSchema):
-
     id = UUID(dump_only=True)
     borrowed_books = Nested(BorrowedBookSchema, many=True, required=True)
     customer = FixedRelated(required=True)

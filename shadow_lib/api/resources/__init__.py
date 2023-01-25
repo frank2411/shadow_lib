@@ -11,7 +11,7 @@ from .token import RefreshToken, RevokeAccessToken, RevokeRefreshToken
 from .author import AuthorDetailResource, AuthorListResource
 from .book import BookDetailResource, BookListResource, BookSearchResource
 from .customer import CustomerDetailResource, CustomerListResource
-from .order import OrderDetailResource, OrderListResource
+from .order import OrderDetailResource, OrderListResource, OrderCloseResource
 from .borrowed_book import BorrowedBookDetailResource, BorrowedBookListResource
 
 
@@ -36,6 +36,7 @@ __all__ = [
     "CustomerListResource",
     "OrderDetailResource",
     "OrderListResource",
+    "OrderCloseResource",
     "BorrowedBookDetailResource",
     "BorrowedBookListResource",
 ]

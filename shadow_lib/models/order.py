@@ -6,6 +6,7 @@ from flask import abort
 
 from sqlalchemy import Column, Date, Integer, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql.expression import false
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import select
@@ -87,7 +88,9 @@ class Order(db.Model):  # type: ignore
 
     @staticmethod
     def get_order(order_id: uuid.UUID, current_user: Any) -> "Order":
-        order_query = select(Order).where(Order.id == order_id)
+        order_query = select(Order).where(
+            Order.id == order_id, Order.has_been_returned == false()
+        )
         order = db.session.execute(order_query).unique().scalar_one_or_none()
 
         if not order:

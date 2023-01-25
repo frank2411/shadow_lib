@@ -1,7 +1,11 @@
 from flask import current_app
 from marshmallow import Schema, fields
 
-from shadow_lib.api.resources import OrderDetailResource, OrderListResource
+from shadow_lib.api.resources import (
+    OrderDetailResource,
+    OrderListResource,
+    OrderCloseResource,
+)
 
 from shadow_lib.api.schemas import OrderSchema
 from shadow_lib.extensions import api_spec
@@ -27,6 +31,9 @@ class OrderSchemaPatchFixed(OrderSchema):
     )
     customer = fields.UUID(required=True)
 
+    class Meta:
+        exclude = ("has_been_returned",)
+
 
 class OrderSchemaRich(Schema):
     message = fields.Str()
@@ -38,6 +45,9 @@ class OrderSchemaMany(Schema):
 
 
 api_spec.components.schema("OrderSchema", schema=OrderSchema)
+api_spec.components.schema(
+    "OrderSchemaNoReturned", schema=OrderSchema(exclude=["has_been_returned"])
+)
 api_spec.components.schema("OrderSchemaFixed", schema=OrderSchemaFixed)
 api_spec.components.schema("OrderSchemaCreationFixed", schema=OrderSchemaCreationFixed)
 api_spec.components.schema("OrderSchemaPatchFixed", schema=OrderSchemaPatchFixed)
@@ -146,6 +156,10 @@ api_spec.path(
                     "description": "List of errors occured in update.",
                     "content": {"application/json": {"schema": "GeneralErrorSchema"}},
                 },
+                "404": {
+                    "description": "Order Not found or already closed",
+                    "content": {"application/json": {"schema": "GeneralErrorSchema"}},
+                },
             },
         ),
         delete=dict(
@@ -160,6 +174,40 @@ api_spec.path(
                 },
                 "404": {
                     "description": "order not found.",
+                    "content": {"application/json": {"schema": "GeneralMessageSchema"}},
+                },
+            },
+        ),
+    ),
+)
+
+
+api_spec.path(
+    resource=OrderCloseResource,
+    # api=api,
+    app=current_app,
+    parameters=[
+        {
+            "name": "id",
+            "in": "path",
+            "required": True,
+            "description": "Order id on which perfom actions.",
+            "schema": {"type": "string", "format": "uuid"},
+        }
+    ],
+    operations=dict(
+        patch=dict(
+            security=[{"bearerAuth": []}],
+            summary="Closes an Order",
+            description="Cloes an Order",
+            tags=["orders_detail"],
+            responses={
+                "200": {
+                    "description": "order closed",
+                    "content": {"application/json": {"schema": "OrderSchemaRich"}},
+                },
+                "404": {
+                    "description": "Order Not found or already closed",
                     "content": {"application/json": {"schema": "GeneralMessageSchema"}},
                 },
             },
